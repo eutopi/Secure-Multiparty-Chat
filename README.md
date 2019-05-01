@@ -1,1 +1,1 @@
-# secure-multiparty-chat
+# Secure Multiparty Chat
