@@ -3,6 +3,7 @@
 
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
+from prng.prng import generate
 import datetime
 
 INVITER_ID = 'A'
@@ -25,8 +26,8 @@ print('Invitees are' + INVITER_LIST)
 print('Group id is ' + GROUP_ID)
 time = datetime.datetime.now()
 print('The current time is ' + str(time))
-print('Generating group key...')
-groupkey = ''
+groupkey = generate()
+print('Generating group key...' + groupkey)
 
 # RSA PKCS1 PSS SIGNATURE
 # import the key pair of INVITER_ID
@@ -57,8 +58,6 @@ for invitee in INVITEE_LIST:
     cipher = PKCS1_OAEP.new(pubkey)
     ciphertext = cipher.encrypt(msg)
 
-    print('Sending invitation to ' + invitee);
-    netif.send_msg(dst, msg.encode('utf-8'))
-
     # Send the encrypted message
-
+    print('Sending invitation to ' + invitee);
+    netif.send_msg('S', msg.encode('utf-8'))
