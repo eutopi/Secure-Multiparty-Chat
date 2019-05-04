@@ -1,0 +1,4 @@
+enckey: 0123456789abcdef0123456789abcdef
+groupkey: fedcba9876543210fedcba9876543210
+rcvsqn: 2
+sender: A
