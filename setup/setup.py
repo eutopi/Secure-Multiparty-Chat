@@ -2,10 +2,26 @@ import sys, getopt
 from Crypto.PublicKey import RSA
 from base64 import b64encode
 
+totalnum = 0
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:],'hn:')
+except getopt.GetoptError:
+    print('Usage: setup.py -n <number of members>')
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == '-h':
+        print('Usage: setup.py -n <number of members>')
+        sys.exit()
+    elif opt == '-n':
+        totalnum = int(arg)
+if totalnum == 0:
+    print('Error: total number of group members is missing.')
+    sys.exit(2)
+
+
 tablefile = "table.txt"
 privatekfile = "privatek.txt"
-
-totalnum = 3
 otablefile = open(tablefile,'w')
 
 
