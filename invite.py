@@ -41,10 +41,9 @@ signer = PKCS1_PSS.new(sigkey)
 
 # import public key of inviter
 with open('setup/table.txt') as f:
-    kfile = f.readlines()
-pubkeys = [x.strip() for x in kfile]
-for line in pubkeys:
-    print(line[0])
+    kfile = f.read()
+pubkeys = kfile.split("member:")
+print(pubkeys)
 #pubkeystr =
 '''
 NET_PATH = './network/'
