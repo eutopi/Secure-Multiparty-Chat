@@ -26,8 +26,8 @@ for i in range(totalnum):
 	opemfile.write(key.exportKey(format='PEM').decode('ASCII'))
 	opemfile.close()
 	# output table file 
-	otablefile.write(member+"|"+str(sqnr)+"|")
-	otablefile.write(publickey)
+	otablefile.write('member:'+member+"|"+str(sqnr)+"|")
+	otablefile.write('key:'+publickey)
 	otablefile.write("\n")
 	# output private key file 
 	privatekfile = "privatek%s.txt"%member
