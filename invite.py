@@ -4,6 +4,7 @@
 from netsim.netinterface import network_interface
 from Crypto.Signature import PKCS1_PSS
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from prng.prng import generate
@@ -54,23 +55,29 @@ if(pubkeystr == ''):
 
 NET_PATH = './netsim/network/'
 OWN_ADDR = INVITER_ID
+# ISO 11770-3/2
 netif = network_interface(NET_PATH, OWN_ADDR)
 print('Main loop started...')
 for invitee in INVITEE_LIST:
-    print('Signing for ' + invitee + '...', end='')
-    msg_to_be_signed = invitee + str(GROUP_ID) + groupkey + str(time)
-    h = SHA256.new()
-    h.update(msg_to_be_signed.encode('utf-8'))
-    signature = signer.sign(h)
-
-    msg = INVITER_ID + str(GROUP_ID) + groupkey + str(time) + str(signature)
-
+    print('Encrypting group key...')
+    plaintext = INVITER_ID + str(GROUP_ID) + groupkey
     # Public key encryption using RSA
     pubkey = RSA.import_key(pubkeystr)
     cipher = PKCS1_OAEP.new(pubkey)
-    ciphertext = cipher.encrypt(msg)
+    ciphertext = cipher.encrypt(plaintext.encode('utf-8'))
+    print('Encryption complete.')
+    
+    print('Signing for ' + invitee + '...')
+    msg_to_be_signed = invitee + str(time) + str(ciphertext)
+    h = SHA256.new()
+    h.update(msg_to_be_signed.encode('utf-8'))
+    signature = signer.sign(h)
+    print('Signature complete.')
+    
+    msg = str(time).encode('utf-8') + ciphertext + signature
+    print(msg)
 
     # Send the encrypted message
     print('Sending invitation to ' + invitee);
-    netif.send_msg('S', msg.encode('utf-8'))
+    netif.send_msg('S', msg)
 
