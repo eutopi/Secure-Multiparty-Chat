@@ -20,6 +20,11 @@ for i in range(totalnum):
 	privatekey = key.exportKey(format='PEM').splitlines()[1:-1]
 	privatekey = b'\n'.join(privatekey).decode('ASCII')
 	sqnr = 0
+	# output private key pem file 
+	pemfile = "%s-key.pem"%member
+	opemfile = open(pemfile,'w')
+	opemfile.write(key.exportKey(format='PEM').decode('ASCII'))
+	opemfile.close()
 	# output table file 
 	otablefile.write(member+"|"+str(sqnr)+"|")
 	otablefile.write(publickey)
