@@ -46,7 +46,9 @@ while True:
     # Calling receive_msg() in blocking mode ...
     status, msg = netif.receive_msg(blocking=True)
     if status:
-        print('Received message: ' + msg.decode('utf-8'))
+        print('Received message:')
+        print(msg)
         netif.send_msg('ABC', msg)
-        print('Sending message: ' +  msg.decode('utf-8'))
+        print('Sending message:')
+        print(msg)
 

@@ -4,8 +4,8 @@
 import os, sys, getopt, time
 
 NET_PATH = './network/'
-ADDR_SPACE = 'ABC'
-CLEAN = False
+ADDR_SPACE = 'SABC'
+CLEAN = True
 TIMEOUT = 0.500  # 500 millisec
 
 def read_msg(src):
