@@ -14,11 +14,11 @@ member = 'A'
 for i in range(totalnum):
 	# create key pairs for each memeber
 	key = RSA.generate(1024)
-	publickey = key.publickey().exportKey(format='PEM').splitlines()[1:-1]
-	publickey = b''.join(publickey).decode('ASCII')
+	publickey = key.publickey().exportKey(format='PEM').decode('ASCII')#.splitlines()[1:-1]
+	#publickey = b''.join(publickey).decode('ASCII')
 
-	privatekey = key.exportKey(format='PEM').splitlines()[1:-1]
-	privatekey = b''.join(privatekey).decode('ASCII')
+	privatekey = key.exportKey(format='PEM').decode('ASCII')#.splitlines()[1:-1]
+	#privatekey = b''.join(privatekey).decode('ASCII')
 	sqnr = 0
 	# output private key pem file 
 	pemfile = "%s-key.pem"%member
