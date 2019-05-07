@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 #invite.py
 
-from netinterface import network_interface
+from netsim.netinterface import network_interface
+from Crypto.Signature import PKCS1_PSS
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from prng.prng import generate
@@ -23,8 +24,8 @@ for opt, arg in opts:
 '''
 
 print('Inviter is ' + INVITER_ID)
-print('Invitees are' + INVITER_LIST)
-print('Group id is ' + GROUP_ID)
+print('Invitees are ' + INVITEE_LIST)
+print('Group id is ' + str(GROUP_ID))
 time = datetime.datetime.now()
 print('The current time is ' + str(time))
 groupkey = generate()
@@ -32,12 +33,20 @@ print('Generating group key...' + groupkey)
 
 # RSA PKCS1 PSS SIGNATURE
 # import the key pair of INVITER_ID
-sigkfile = open('signature key file placeholder', 'r')
-sigkeystr = kfile.read()
+sigkfile = open('setup/A-key.pem', 'r')
+sigkeystr = sigkfile.read()
 sigkfile.close()
 sigkey = RSA.import_key(sigkeystr)
 signer = PKCS1_PSS.new(sigkey)
 
+# import public key of inviter
+with open('setup/table.txt') as f:
+    kfile = f.readlines()
+pubkeys = [x.strip() for x in kfile]
+for line in pubkeys:
+    print(line[0])
+#pubkeystr =
+'''
 NET_PATH = './network/'
 OWN_ADDR = INVITER_ID
 netif = network_interface(NET_PATH, OWN_ADDR)
@@ -52,9 +61,6 @@ for invitee in INVITEE_LIST:
     msg = INVITER_ID + GROUP_ID + groupkey + time + signature
 
     # Public key encryption using RSA
-    kfile = open('rsa pub key of invitee', 'r')
-    pubkeystr = kfile.read()
-    kfile.close()
     pubkey = RSA.import_key(pubkeystr)
     cipher = PKCS1_OAEP.new(pubkey)
     ciphertext = cipher.encrypt(msg)
@@ -62,3 +68,4 @@ for invitee in INVITEE_LIST:
     # Send the encrypted message
     print('Sending invitation to ' + invitee);
     netif.send_msg('S', msg.encode('utf-8'))
+'''
