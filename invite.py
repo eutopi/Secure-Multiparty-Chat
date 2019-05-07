@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #invite.py
 
+from netinterface import network_interface
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from prng.prng import generate
