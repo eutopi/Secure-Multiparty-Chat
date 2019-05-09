@@ -8,10 +8,10 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from prng.prng import generate
-import datetime
+from datetime import datetime
 
 '''
-    Time = 26 bytes
+    Time = 17 bytes
     Cipher = 128 bytes (content = 1 byte (ID) and 16 bytes (public key))
     Signature = length varies, index at i=154 until the end
 '''
@@ -24,8 +24,12 @@ GROUP_ID = 0
 print('Inviter is ' + INVITER_ID)
 print('Invitees are ' + INVITEE_LIST)
 print('Group id is ' + str(GROUP_ID))
-time = datetime.datetime.now()
+time = datetime.now()
 print('The current time is ' + str(time))
+timestamp = datetime.timestamp(time)
+print('The timestamp is ' + str(timestamp))
+if len(str(timestamp)) != 17:
+    timestamp = str(timestamp) + '0'
 groupkey = generate()
 print('Generating group key...' + groupkey)
 
@@ -66,13 +70,13 @@ for invitee in INVITEE_LIST:
     print('Encryption complete.')
     
     print('Signing for ' + invitee + '...')
-    msg_to_be_signed = (invitee + str(time)).encode('utf-8') + ciphertext
+    msg_to_be_signed = (invitee + str(timestamp)).encode('utf-8') + ciphertext
     h = SHA256.new()
     h.update(msg_to_be_signed)
     signature = signer.sign(h)
     print('Signature complete.')
     
-    msg = str(time).encode('utf-8') + ciphertext + signature
+    msg = str(timestamp).encode('utf-8') + ciphertext + signature
     #print(msg)
 
     # Send the encrypted message

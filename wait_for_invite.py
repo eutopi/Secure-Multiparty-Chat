@@ -7,9 +7,10 @@ from Crypto.Signature import PKCS1_PSS
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
+from datetime import datetime
 
 '''
-    Time = 26 bytes
+    Time = 17 bytes
     Cipher = 128 bytes (content = 1 byte (ID) and 16 bytes (public key))
     Signature = length varies, index at i=154 until the end
 '''
@@ -37,6 +38,22 @@ for opt, arg in opts:
     elif opt == '-s' or opt == '--self':
         OWN_ADDR = arg
 
+def saveGroupKey(key, ADDR):
+    '''
+    f = open('MessageFormat/sndstate.txt', 'r')
+    lines = f.readlines()
+    lines[0] = 'groupkey: ' + key + '\n'
+    print(lines)
+    f.close()
+    f = open('MessageFormat/sndstate1.txt', 'w')
+    for l in lines:
+        f.write(l)
+    f.close()
+    '''
+    f = open('MessageFormat/sndstate.txt', 'w')
+    f.write(key)
+    f.close()
+
 # RSA PKCS1 PSS SIGNATURE
 # import the public key of INVITER_ID
 pubkeystr = ''
@@ -60,14 +77,18 @@ netif = network_interface(NET_PATH, OWN_ADDR)
 print('Main loop started...')
 while True:
     status, msg = netif.receive_msg(blocking=True)
-    time = msg[:26]
-    ciphertext = msg[26:154]
-    signature = msg[154:]
+    timestamp = msg[:17]
+    ciphertext = msg[17:145]
+    signature = msg[145:]
     print('Verifying time stamp...')
-    if (True): # verify time stamp
+    current_time = datetime.now()
+    current_timestamp = datetime.timestamp(current_time)
+    print("Current timestamp: " + str(current_timestamp))
+    print("Received timestamp: " + timestamp.decode('utf-8'))
+    if (current_timestamp - float(timestamp) <= 3): # verify time stamp
         print('Time stamp verified')
         print('Verifying signature...')
-        msg_to_be_signed = OWN_ADDR.encode('utf-8') + time + ciphertext
+        msg_to_be_signed = OWN_ADDR.encode('utf-8') + timestamp + ciphertext
         h = SHA256.new()
         h.update(msg_to_be_signed)
         pubkey = RSA.import_key(pubkeystr)
@@ -82,8 +103,12 @@ while True:
                 print('Decryption success.')
                 print('Group ID is ' + plaintext[1])
                 print('Group key is ' + plaintext[2:])
+                #saveGroupKey(plaintext[2:], OWN_ADDR)
                 break
             else:
                 print('Failed.')
         else:
             print('Signature is incorrect! Message was either modified or this is someone else\'s invitation.')
+    else:
+        print('The timestamp has expired.')
+
