@@ -31,7 +31,7 @@ print('The timestamp is ' + str(timestamp))
 if len(str(timestamp)) != 17:
     timestamp = str(timestamp) + '0'
 groupkey = generate()
-print('Generating group key...' + groupkey)
+print('Generating group key...' + str(groupkey))
 
 # RSA PKCS1 PSS SIGNATURE
 # import the private key of inviter
@@ -62,7 +62,7 @@ for invitee in INVITEE_LIST:
     if(pubkeystr == ''):
         print('No public key string read!')
     
-    plaintext = INVITER_ID + str(GROUP_ID) + groupkey
+    plaintext = INVITER_ID + str(GROUP_ID) + str(groupkey)
     # Public key encryption using RSA
     pubkey = RSA.import_key(pubkeystr)
     cipher = PKCS1_OAEP.new(pubkey)
