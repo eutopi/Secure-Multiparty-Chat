@@ -50,7 +50,7 @@ def saveGroupKey(key, ADDR):
         f.write(l)
     f.close()
     '''
-    f = open('MessageFormat/sndstate.txt', 'w')
+    f = open('groupkey.txt', 'w')
     f.write(key)
     f.close()
 
@@ -103,7 +103,7 @@ while True:
                 print('Decryption success.')
                 print('Group ID is ' + plaintext[1])
                 print('Group key is ' + plaintext[2:])
-                #saveGroupKey(plaintext[2:], OWN_ADDR)
+                saveGroupKey(plaintext[2:], OWN_ADDR)
                 break
             else:
                 print('Failed.')
