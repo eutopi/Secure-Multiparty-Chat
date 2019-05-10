@@ -32,7 +32,7 @@ if len(str(timestamp)) != 17:
     timestamp = str(timestamp) + '0'
 groupkey = generate()
 print('Generating group key...' + str(groupkey))
-f = open('groupkey.txt', 'wb')
+f = open('groupkey.txt', 'w')
 f.write(groupkey)
 f.close()
 

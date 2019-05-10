@@ -26,4 +26,4 @@ def generate():
     ofile.close()
 
     #print output
-    return prngoutput
+    return prngoutput.hex()[:16]
