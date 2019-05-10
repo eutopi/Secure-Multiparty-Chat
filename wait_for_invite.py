@@ -103,7 +103,7 @@ while True:
                 print('Decryption success.')
                 print('Group ID is ' + plaintext[1])
                 print('Group key is ' + plaintext[2:])
-                saveGroupKey(plaintext[2:], OWN_ADDR)
+                #saveGroupKey(plaintext[2:], OWN_ADDR)
                 break
             else:
                 print('Failed.')
