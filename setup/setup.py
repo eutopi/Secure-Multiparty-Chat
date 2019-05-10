@@ -20,13 +20,12 @@ if totalnum == 0:
     sys.exit(2)
 
 
-tablefile = "table.txt"
 privatekfile = "privatek.txt"
-otablefile = open(tablefile,'w')
 
 
 #create key pairs for each memeber
 member = 'A'
+tablecontent=''
 for i in range(totalnum):
 	# create key pairs for each memeber
 	key = RSA.generate(1024)
@@ -41,9 +40,9 @@ for i in range(totalnum):
 	opemfile = open(pemfile,'w')
 	opemfile.write(key.exportKey(format='PEM').decode('ASCII'))
 	opemfile.close()
-	# output table file 
-	otablefile.write('member:'+member+"|"+str(sqnr)+"|")
-	otablefile.write('key:'+publickey)
+	# update table content
+	tablecontent+='member:'+member+"|"+str(sqnr)+"|"
+	tablecontent+='key:'+publickey
 	# output private key file 
 	privatekfile = "privatek%s.txt"%member
 	okeyfile = open(privatekfile,'w')
@@ -51,5 +50,14 @@ for i in range(totalnum):
 	okeyfile.close()
 	member=chr(ord(member)+1)
 
-otablefile.close()
+
 # create certificate for each member
+
+# create a table file for each member
+member = 'A'
+for i in range(totalnum):
+	tablefile = "table%s.txt"%member
+	otablefile = open(tablefile,'w')
+	otablefile.write(tablecontent)
+	otablefile.close()
+	member=chr(ord(member)+1)
