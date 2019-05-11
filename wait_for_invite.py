@@ -37,11 +37,7 @@ for opt, arg in opts:
         OWN_ADDR = arg
 
 def saveKeys(groupkey, prikey, ADDR):
-    filename = 'private/' + ADDR + '.txt'
-    f = open(filename, 'w')
-    f.write(prikey)
-    f.write("Group key: " + groupkey)
-    f.close()
+    return
 
 # RSA PKCS1 PSS SIGNATURE
 # import the public key of INVITER_ID

@@ -31,7 +31,7 @@ msg = ifile.read()
 ifile.close()
 
 # read the content of the group key file
-ifile = open(groupkeyfile, 'rt')
+ifile = open(groupkeyfile, 'rb')
 groupkey = ifile.read()
 ifile.close()
 
@@ -43,7 +43,7 @@ ifile.close()
 # parse the message
 header_length = 7                 # header is 7 bytes long
 header = msg[0:header_length]
-nonce = msg[header_length:header_length+8]   # nonce is AES.block_size bytes long
+nonce = msg[header_length:header_length+8]   # nonce is 8 bytes long
 sig_length = 32                     # SHA256 hash is 32 bytes long
 encrypted = msg[header_length+8:-sig_length]  # the encrypted part is the header and Payload
 sig = msg[-sig_length:]
@@ -83,7 +83,7 @@ print("Decryption is attempted...")
 ctr = Counter.new(64, prefix=nonce, initial_value=0)
 
 # create an AES-CTR cipher object
-groupkey = groupkey.encode('utf-8')
+groupkey = groupkey
 ENC = AES.new(groupkey, AES.MODE_CTR, counter=ctr)
 
 # decrypt the header + payload

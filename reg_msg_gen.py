@@ -35,7 +35,7 @@ if len(senderID) == 0:
     sys.exit(2)
 
 # read the content of the group key file
-ifile = open(groupkeyfile, 'rt')
+ifile = open(groupkeyfile, 'rb')
 groupkey = ifile.readline()
 ifile.close()
 
@@ -105,7 +105,7 @@ nonce = Random.get_random_bytes(8)
 ctr = Counter.new(64, prefix=nonce, initial_value=0)
 
 # create an AES-CTR cipher object and encrypt the header + payload
-groupkey = groupkey.encode('utf-8')
+groupkey = groupkey
 ENC = AES.new(groupkey, AES.MODE_CTR, counter=ctr)
 payload = payload.encode('utf-8')
 encrypted = ENC.encrypt(payload)
