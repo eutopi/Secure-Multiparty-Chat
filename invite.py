@@ -7,13 +7,13 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
-from prng.prng import generate
+from Crypto.Random import get_random_bytes
 from datetime import datetime
 
 '''
     Time = 17 bytes
     Cipher = 128 bytes (content = 1 byte (ID) and 16 bytes (public key))
-    Signature = length varies, index at i=154 until the end
+    Signature = length varies, index at i=145 until the end
 '''
 
 # Can change these specifications later
@@ -30,15 +30,15 @@ timestamp = datetime.timestamp(time)
 print('The timestamp is ' + str(timestamp))
 if len(str(timestamp)) != 17:
     timestamp = str(timestamp) + '0'
-groupkey = generate()
+groupkey = get_random_bytes(16)
 print('Generating group key...' + str(groupkey))
-f = open('groupkey.txt', 'w')
+f = open('groupkey.txt', 'wb')
 f.write(groupkey)
 f.close()
 
 # RSA PKCS1 PSS SIGNATURE
 # import the private key of inviter
-sigkfile = open('setup/A-key.pem', 'r')
+sigkfile = open('setup/privatek%s.txt'%INVITER_ID, 'r')
 sigkeystr = sigkfile.read()
 sigkfile.close()
 sigkey = RSA.import_key(sigkeystr)
