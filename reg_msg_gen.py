@@ -1,37 +1,37 @@
 import sys, getopt
+from netsim.netinterface import network_interface
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto import Random
 from base64 import b64encode
 from Crypto.Util import Counter
 from Crypto.Signature import PKCS1_PSS
+from Crypto.PublicKey import RSA
 
-sndstatefile = 'sndstate.txt'
+sndstatefile = ''
 groupkeyfile = 'groupkey.txt'
-# sndstatefile = ''
-# groupkeyfile = ''
-senderName = ''
-outputfile = 'output.txt'
+senderID = 'A'
+outputfile = ''
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],'hi:o:')
 except getopt.GetoptError:
-    print("Error Usage: reg_msg-gen.py -g <groupkeyfile> -s <sndstatefile> -m <sender ID>")
+    print("Error Usage: reg_msg-gen.py -m <sender ID>")
     sys.exit(2)
 
 for opt, arg in opts:
     if opt == '-h':
-        print("Usage: reg_msg-gen.py -g <groupkeyfile> -s <sndstatefile> -m <sender ID>")
+        print("Usage: reg_msg-gen.py -m <sender ID>")
         sys.exit()
-    elif opt == '-g':
-        groupkeyfile = arg
-    elif opt == '-s':
-        sndstatefile = arg
-    elif opt == '-m':
-        senderName = arg
+    # elif opt == '-g':
+    #     groupkeyfile = arg
+    # elif opt == '-s':
+    #     sndstatefile = arg
+    elif opt == '-i':
+        senderID = arg
 
-if len(groupkeyfile) == 0:
-    print("Error: Name of groupkey file is missing.")
+if len(senderID) == 0:
+    print("Error: Sender ID is missing.")
     sys.exit(2)
 
 # read the content of the group key file
@@ -45,36 +45,39 @@ if len(groupkey) != 16:
     sys.exit(2)
 
 # read the sender and their rcvstate from the table file
+# **After update**
+# fileName = 'setup/table' + senderID + '.txt'
+# tablefile = open(fileName, 'r')
+# content = tablefile.read()
+# tablefile.close()
+
 # for A now
-ifile = open('setup/table.txt', 'r')
-line = ifile.read()
-# line = ifile.readline() after making making new lines for table?
-sender = line[len("member:"):len("member:")+1]
-print(sender)
-sndsqn = line[len("member:")+2:len("member:")+3]
-sndsqn = int(sndsqn, base=10)
-print(sndsqn)
+ifile = open('setup/table_temp.txt', 'r')
+content = ifile.read()
 ifile.close()
+
+sndsqnIndex = content.find(str(senderID)) + 2
+sndsqn = content[sndsqnIndex:sndsqnIndex+1]
+sndsqn = int(sndsqn, base=10)
+print('senderID:' + senderID)
+print('sndsqn:' + str(sndsqn))
+
+"""
+#AFTER tableA/B/C format updated
+fileName = 'setup/table' + senderID + '.txt'
+tablefile = open(fileName, 'r')
+content = file.read()
+tablefile.close()
+#index of the sendsequence num from tableX.txt
+sndsqnIndex = content.find(str(senderID) + "|") + 1 
+sndsqn = content[sndsqnIndex:sndsqnIndex+1]
+print('sndsqn of the sender:' + sndsqn)
+"""
+
 
 # read the message input
 payload = input("Type the message: ")
 print(payload)
-
-"""
-# RSA PKCS1 PSS SIGNATURE
-# import the private key of inviter
-sigkfile = open('setup/A-key.pem', 'r')
-sigkeystr = sigkfile.read()
-sigkfile.close()
-sigkey = RSA.import_key(sigkeystr)
-signer = PKCS1_PSS.new(sigkey)
-
-NET_PATH = './netsim/network/'
-OWN_ADDR = INVITER_ID
-# ISO 11770-3/2
-netif = network_interface(NET_PATH, OWN_ADDR)
-print('Main loop started...')
-"""
 
 # compute payload_length + sig_length
 payload_length = len(payload)
@@ -91,44 +94,87 @@ sig_length = 32  # SHA256 hash value is 32 bytes long
 msg_length = 7 + AES.block_size + payload_length + sig_length
 
 # create header
-header_sender = sender.encode('utf-8')   # message sender
+header_sender = senderID.encode('utf-8')   # message sender
 header_length = msg_length.to_bytes(2, byteorder='big') # message length (encoded on 2 bytes)
 header_sqn = (sndsqn + 1).to_bytes(4, byteorder='big')  # next message sequence number (encoded on 4 bytes)
 header = header_sender + header_length + header_sqn 
 
-nonce = Random.get_random_bytes(AES.block_size)
+nonce = Random.get_random_bytes(8)
 
 # create a counter object and set the nonce as its prefix and set the initial counter value to 0 
 ctr = Counter.new(64, prefix=nonce, initial_value=0)
 
 # create an AES-CTR cipher object and encrypt the header + payload
+groupkey = groupkey.encode('utf-8')
 ENC = AES.new(groupkey, AES.MODE_CTR, counter=ctr)
-encrypted = ENC.encrypt(header + payload)
+payload = payload.encode('utf-8')
+encrypted = ENC.encrypt(payload)
 
 print('Nonce: ' + nonce.hex())
 print('Encrypted: ')
+# print(encrypted)
 print(encrypted.hex())
 
 # create a SHA256 hash object and hash the encrypted content
 h = SHA256.new()
 h.update(encrypted)
 
+# RSA PKCS1 PSS SIGNATURE
+# import the private key of inviter
+fileName = 'setup/' + senderID
+fileName = fileName+ '-key.pem'
+sigkfile = open(fileName, 'r')
+sigkeystr = sigkfile.read()
+sigkfile.close()
+sigkey = RSA.import_key(sigkeystr)
+signer = PKCS1_PSS.new(sigkey)
+
 # sign the hash
 signature = signer.sign(h)
+
+NET_PATH = './netsim/network/'
+OWN_ADDR = senderID
+# ISO 11770-3/2
+netif = network_interface(NET_PATH, OWN_ADDR)
+print('Main loop started...')
 
 #print(signature) 
 print(signature.hex())
 
-# save output sndstate of each sender
-state = "enckey: " + enckey.hex() + '\n'
-state = state + "groupkey: " + groupkey.hex() + '\n'
-state = state + "sndsqn: " + str(sndsqn + 1)
-state = state + "sender: " + str(sender)
-ofile = open(sndstatefile, 'wb')
-ofile.write(state)
-ofile.close()
+outputfile = 'output' + senderID
+outputfile = outputfile + '.txt'
 
 # write full encrypted message and signature 
 ofile = open(outputfile, 'wb')
 ofile.write(header + nonce + encrypted + signature)
 ofile.close()
+
+
+####UPDATE THE SNDSQN NUMBER IN THE TABLE ####
+# save output sndsqn of each sender on the table
+"""
+snd_state = str(sndsqn + 1)
+
+sndsqnIndex = content.find(str(senderID)) + 2
+content = content[:sndsqnIndex] + snd_state + content[sndsqnIndex+1:]
+
+# fileName = 'setup/table' + senderID + '.txt'
+# tablefile = open(fileName, 'wt')
+# ofile.write(content)
+# tablefile.close()
+"""
+
+
+# if rcv state not exists, create one
+try:
+    rcvstatefile = 'rcvstate' + senderID + '.txt'
+    ofile = open(rcvstatefile, 'r')
+    # Store configuration file values
+except FileNotFoundError:
+    # Keep preset values
+    state = "rcvsqn: " + str(0)
+    rcvstatefile = 'rcvstate' + senderID + '.txt'
+    ofile = open(rcvstatefile, 'wt')
+    ofile.write(state)
+    ofile.close()
+    print("Created new rcvstate file")
