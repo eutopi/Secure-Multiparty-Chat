@@ -52,12 +52,14 @@ header_length = header[1:3]         # msg length is encoded on 2 bytes
 header_sqn = header[3:7]            # msg sqn is encoded on 4 bytes
 
 print("Message header:")
-print("   - header_sender: " + header_sender.hex())
-print("   - message length: " + header_length.hex() + " (" + str(int.from_bytes(header_length, byteorder='big')) + ")")
+print("   - header_sender: " + header_sender.decode('utf-8'))
+print("   - message length: " + header_length.decode('utf-8'))
 print("   - message snd sequence number: " + header_sqn.hex() + " (" + str(int.from_bytes(header_sqn, byteorder='big')) + ")")
 
+print("len(msg) is " + str(len(msg)))
+print("header_length is " + str(header_length.decode('utf-8')))
 # check the msg length
-if len(msg) != int.from_bytes(header_length, byteorder='big'):
+if len(msg) != header_length.decode('utf-8'):
     print("Warning: Message length value in header is wrong!")
     print("Processing is continued nevertheless...")
 
