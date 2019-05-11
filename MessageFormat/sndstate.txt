@@ -1,3 +1,0 @@
-groupkey: fedcba9876543210fedcba9876543210
-sndsqn: 2
-sender: A
