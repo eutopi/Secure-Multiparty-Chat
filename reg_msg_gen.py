@@ -95,7 +95,8 @@ msg_length = 7 + AES.block_size + payload_length + sig_length
 
 # create header
 header_sender = senderID.encode('utf-8')   # message sender
-header_length = msg_length.to_bytes(2, byteorder='big') # message length (encoded on 2 bytes)
+header_length = str(msg_length).encode('utf-8') # message length (encoded on 2 bytes)
+print(header_length)
 header_sqn = (sndsqn + 1).to_bytes(4, byteorder='big')  # next message sequence number (encoded on 4 bytes)
 header = header_sender + header_length + header_sqn 
 
