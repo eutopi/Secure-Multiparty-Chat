@@ -64,6 +64,9 @@ for invitee in INVITEE_LIST:
             pubkeystr = k.split("key:")[1]
     if(pubkeystr == ''):
         print('No public key string read!')
+
+    print('(pubkeystr):' + pubkeystr)
+
     
     plaintext = INVITER_ID + str(GROUP_ID) + str(groupkey)
     # Public key encryption using RSA

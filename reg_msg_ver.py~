@@ -26,10 +26,15 @@ for opt, arg in opts:
     elif opt == '-i':
         senderID = arg
 
+# read the content of the encrypted file into msg
+encfile = 'output' + senderID + '.txt'
+ifile = open(encfile, 'rb')
+msg = ifile.read()
+ifile.close()
+
 NET_PATH = './netsim/network/'
 OWN_ADDR = senderID
 netif = network_interface(NET_PATH, OWN_ADDR)
-# read the message
 status, msg = netif.receive_msg(blocking=True)
 
 # read the content of the group key file
@@ -143,14 +148,14 @@ if result:
     print('This is your message:')
     print(msg_signed)
 
-    #update rcvsqn in the table file
-    fileName = 'setup/table.txt'
-    tablefile = open(fileName, 'wt')
-    rcvIndex = content.find(str(senderID)+ '|')+2
-    print('new rcvIndex' + content[rcvIndex:rcvIndex+1])
-    content = content[:rcvIndex] + str(sndsqn) + content[rcvIndex+1:]
-    tablefile.write(content)
-    tablefile.close()
+	#update rcvsqn in the table file
+	fileName = 'setup/table.txt'
+	tablefile = open(fileName, 'wt')
+	rcvIndex = content.find(str(senderID)+ '|')+2
+	print('new rcvIndex' + content[rcvIndex:rcvIndex+1])
+	content = content[:rcvIndex] + str(sndsqn) + content[rcvIndex+1:]
+	tablefile.write(content)
+	tablefile.close()
     print("Receiving state is saved.")
     print("Processing completed.")
 
