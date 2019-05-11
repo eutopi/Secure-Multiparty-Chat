@@ -12,11 +12,9 @@ from datetime import datetime
 '''
     Time = 17 bytes
     Cipher = 128 bytes (content = 1 byte (ID) and 16 bytes (public key))
-    Signature = length varies, index at i=154 until the end
+    Signature = length varies, index at i=145 until the end
 '''
 
-#INVITER_ID = 'A'
-#OWN_ADDR = 'B'
 NET_PATH = './netsim/network/'
 
 try:
@@ -25,9 +23,9 @@ except getopt.GetoptError:
     print('Usage: python wait_for_invite.py -i <inviter address> -s <self address>')
     sys.exit(1)
 
-#if len(opts) == 0:
-#     print('Usage: python network.py -p <network path> -a <address space> [--clean]')
-#     sys.exit(1)
+if len(opts) != 2:
+     print('Usage: python wait_for_invite.py -i <inviter address> -s <self address>')
+     sys.exit(1)
 
 for opt, arg in opts:
     if opt == '-h' or opt == '--help':
@@ -38,20 +36,11 @@ for opt, arg in opts:
     elif opt == '-s' or opt == '--self':
         OWN_ADDR = arg
 
-def saveGroupKey(key, ADDR):
-    '''
-    f = open('MessageFormat/sndstate.txt', 'r')
-    lines = f.readlines()
-    lines[0] = 'groupkey: ' + key + '\n'
-    print(lines)
-    f.close()
-    f = open('MessageFormat/sndstate1.txt', 'w')
-    for l in lines:
-        f.write(l)
-    f.close()
-    '''
-    f = open('groupkey.txt', 'w')
-    f.write(key)
+def saveKeys(groupkey, prikey, ADDR):
+    filename = 'private/' + ADDR + '.txt'
+    f = open(filename, 'w')
+    f.write(prikey)
+    f.write("Group key: " + groupkey)
     f.close()
 
 # RSA PKCS1 PSS SIGNATURE
@@ -66,6 +55,7 @@ for k in pubkeys:
         pubkeystr = k.split("key:")[1]
 if(pubkeystr == ''):
     print('No public key string read!')
+    sys.exit(1)
 
 # import private key of invitee(self) for RSA
 filename = 'setup/' + OWN_ADDR + '-key.pem'
@@ -103,7 +93,7 @@ while True:
                 print('Decryption success.')
                 print('Group ID is ' + plaintext[1])
                 print('Group key is ' + plaintext[2:])
-                #saveGroupKey(plaintext[2:], OWN_ADDR)
+                saveKeys(plaintext[2:], prikeystr, OWN_ADDR)
                 break
             else:
                 print('Failed.')
