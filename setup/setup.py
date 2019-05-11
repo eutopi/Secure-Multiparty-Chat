@@ -28,17 +28,18 @@ member = 'A'
 tablecontent=''
 for i in range(totalnum):
 	# create key pairs for each memeber
+	pwd = input("Please enter password for user %s:" %member)
+	print(pwd)
 	key = RSA.generate(1024)
 	publickey = key.publickey().exportKey(format='PEM').decode('ASCII')#.splitlines()[1:-1]
 	#publickey = b''.join(publickey).decode('ASCII')
-
-	privatekey = key.exportKey(format='PEM').decode('ASCII')#.splitlines()[1:-1]
+	privatekey = key.exportKey(format='PEM',passphrase = pwd).decode('ASCII')#.splitlines()[1:-1]
 	#privatekey = b''.join(privatekey).decode('ASCII')
 	sqnr = 0
 	# output private key pem file 
 	pemfile = "%s-key.pem"%member
 	opemfile = open(pemfile,'w')
-	opemfile.write(key.exportKey(format='PEM').decode('ASCII'))
+	opemfile.write(privatekey)
 	opemfile.close()
 	# update table content
 	tablecontent+='member:'+member+"|"+str(sqnr)+"|"
