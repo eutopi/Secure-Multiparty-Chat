@@ -48,8 +48,21 @@ print("")
 reset_sqn(OWN_ADDR)
 print("")
 
-messages = ""
-
+sys.stdout.write("Begin chatting!\n\n")
+sys.stdout.flush()
+while True:
+    ready, _, _ = select.select([sys.stdin], [], [], 0)
+    if ready:
+        m = sys.stdin.readline().rstrip('\n')
+        snd_msg = OWN_ADDR + ": " + m
+        to_send = send(OWN_ADDR, snd_msg, groupkey, password)
+        netif.send_msg('S', to_send)
+    else:
+        status, rcv_msg = netif.receive_msg(blocking=False)
+        if status:
+            plaintext = receive(OWN_ADDR, rcv_msg, groupkey)
+            print(plaintext)
+'''
 while True:
     status, rcv_msg = netif.receive_msg(blocking=False)
     if status:
@@ -59,3 +72,4 @@ while True:
         snd_msg = OWN_ADDR + ": " + input("Enter new message: ")
         to_send = send(OWN_ADDR, snd_msg, groupkey, password)
         netif.send_msg('S', to_send)
+'''
