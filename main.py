@@ -61,7 +61,8 @@ while True:
         status, rcv_msg = netif.receive_msg(blocking=False)
         if status:
             plaintext = receive(OWN_ADDR, rcv_msg, groupkey)
-            print(plaintext)
+            if plaintext != None:
+                print(plaintext)
 '''
 while True:
     status, rcv_msg = netif.receive_msg(blocking=False)

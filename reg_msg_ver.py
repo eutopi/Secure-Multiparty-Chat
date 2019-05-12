@@ -59,8 +59,9 @@ def receive(OWN_ADDR, msg, groupkey):
 
     # check the msg length
     if str(len(msg)) != header_length.decode('utf-8'):
-        print("Warning: Message length value in header is wrong!")
-        print("Processing is continued nevertheless...")
+        return
+        #print("Warning: Message length value in header is wrong!")
+        #print("Processing is continued nevertheless...")
 
     # read the rcvstate
     tablefile = open('setup/table%s.txt'%OWN_ADDR, 'r')
