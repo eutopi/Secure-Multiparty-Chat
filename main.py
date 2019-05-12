@@ -1,9 +1,14 @@
 import os, sys, getopt
+from netsim.netinterface import network_interface
+import select
 from invite import invite
 from wait_for_invite import receive_invite
-from reset_rcvsqn_table import reset_rcv_sqn
+from reset_sqn_table import reset_sqn
+from reg_msg_ver import receive
+from reg_msg_gen import send
 
 OWN_ADDR = ''
+NET_PATH = './netsim/network/'
 invite_flag = False
 
 try:
@@ -27,19 +32,30 @@ for opt, arg in opts:
 
 netif = network_interface(NET_PATH, OWN_ADDR)
 if invite_flag:
-    INVITEE_LIST = input("Please enter who you are inviting:")
-    GROUP_ID = input("Please enter group id:")
-    groupkey = invite(OWN_ADDR, INVITEE_LIST, GROUP_ID)
+    password = input("Please enter your password: ")
+    INVITEE_LIST = input("Please enter who you are inviting: ")
+    GROUP_ID = input("Please enter group id: ")
+    print("")
+    groupkey = invite(netif, OWN_ADDR, INVITEE_LIST, GROUP_ID, password)
 else:
+    password = input("Please enter your password: ")
     INVITER = input("Please enter who you are receiving the invitation from: ")
     GROUP_ID = input("Please enter group id: ")
-    groupkey = receive_invite(OWN_ADDR, INVITER, GROUP_ID)
+    groupkey = receive_invite(netif, OWN_ADDR, INVITER, GROUP_ID, password)
 
 print("Key exchange complete")
-reset_rcv_sqn(OWN_ADDR)
+print("")
+reset_sqn(OWN_ADDR)
+print("")
+
+messages = ""
+
 while True:
-    status, msg = netif.receive_msg(blocking=False)
+    status, rcv_msg = netif.receive_msg(blocking=False)
     if status:
-        print(msg)
+        plaintext = receive(OWN_ADDR, rcv_msg, groupkey)
+        print("\n" + plaintext + "\n")
     else:
-        msg = OWN_ADDR + input("Enter new message: ")
+        snd_msg = OWN_ADDR + ": " + input("Enter new message: ")
+        to_send = send(OWN_ADDR, snd_msg, groupkey, password)
+        netif.send_msg('S', to_send)

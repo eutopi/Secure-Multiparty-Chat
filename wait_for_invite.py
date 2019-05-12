@@ -34,7 +34,7 @@ for opt, arg in opts:
     elif opt == '-s' or opt == '--self':
         OWN_ADDR = arg
 '''
-def receive_invite(OWN_ADDR, INVITER_ID, GROUP_ID):
+def receive_invite(netif, OWN_ADDR, INVITER_ID, GROUP_ID, password):
     # RSA PKCS1 PSS SIGNATURE
     # import the public key of INVITER_ID
     pubkeystr = ''
@@ -53,11 +53,9 @@ def receive_invite(OWN_ADDR, INVITER_ID, GROUP_ID):
     prikfile = open("setup/%s-key.pem"%OWN_ADDR,'r')
     prikeystr = prikfile.read()
     prikfile.close()
-    password = input("Please enter your password: ")
     prikey = RSA.import_key(prikeystr,passphrase = password)
 
-    NET_PATH = './netsim/network/'
-    netif = network_interface(NET_PATH, OWN_ADDR)
+    #NET_PATH = './netsim/network/'
     print('Main loop started...')
     while True:
         status, msg = netif.receive_msg(blocking=True)
@@ -69,7 +67,7 @@ def receive_invite(OWN_ADDR, INVITER_ID, GROUP_ID):
         current_timestamp = datetime.timestamp(current_time)
         print("Current timestamp: " + str(current_timestamp))
         print("Received timestamp: " + timestamp.decode('utf-8'))
-        if (current_timestamp - float(timestamp) <= 3): # verify time stamp
+        if (current_timestamp - float(timestamp) <= 10): # verify time stamp
             print('Time stamp verified')
             print('Verifying signature...')
             msg_to_be_signed = OWN_ADDR.encode('utf-8') + timestamp + ciphertext
@@ -81,11 +79,11 @@ def receive_invite(OWN_ADDR, INVITER_ID, GROUP_ID):
                 print('Signature verified.')
                 print('Decryption started...')
                 cipher = PKCS1_OAEP.new(prikey)
-                plaintext = (cipher.decrypt(ciphertext)).decode('utf-8')
-                if str(plaintext)[0] == INVITER_ID and str(plaintext)[1] == GROUP_ID:
+                plaintext = cipher.decrypt(ciphertext)
+                if (plaintext[0:1]).decode('utf-8') == INVITER_ID and (plaintext[1:2]).decode('utf-8') == GROUP_ID:
                     print('Decryption success.')
-                    print('Group ID is ' + plaintext[1])
-                    print('Group key is ' + plaintext[2:])
+                    print('Group ID is ' + (plaintext[1:2]).decode('utf-8'))
+                    print('Group key is ' + str(plaintext[2:]))
                     
                     return(plaintext[2:])
                     break
