@@ -4,7 +4,7 @@
 
 **New Participants**
 
-When creating new participants, run the following. This generates RSA key pairs for *n* people (in this case, we have three) and saves them to password-protected files. Enter passwords for each as prompted and make sure you remember these. You will use them later. 
+When creating new participants, run the following. This generates RSA key pairs for *n* people (in our example case, we have three, but feel free to try as many as you want) and saves them to password-protected files. Enter passwords for each as prompted and make sure you remember these. You will use them later. 
 ```
 python setup/setup.py -n 3
 ```
@@ -13,7 +13,7 @@ python setup/setup.py -n 3
 
 Open up five separate terminals. Two will be used to run the network and the server in the background, while three will be acting as the chat client for each participant. That is, run in the following order:
 ```
-1. python netsim/network.py -a 'SABC' -c 
+1. python netsim/network.py -a 'SABC' -c (S = server, ABC = participants)
 2. python netsim/server.py
 3. python main.py -s B (-s refers to self, so this is the client for participant B)
 4. python main.py -s C (this is the client for participant C)
