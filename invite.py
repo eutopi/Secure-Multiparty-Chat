@@ -33,9 +33,6 @@ def invite(netif, INVITER_ID, INVITEE_LIST, GROUP_ID, password):
         timestamp = str(timestamp) + '0'
     groupkey = get_random_bytes(16)
     print('Generating group key...' + str(groupkey))
-    f = open('groupkey.txt', 'wb')
-    f.write(groupkey)
-    f.close()
 
     # RSA PKCS1 PSS SIGNATURE
     # import the private key of inviter
