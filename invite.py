@@ -21,70 +21,74 @@ INVITER_ID = 'A'
 INVITEE_LIST = 'BC'
 GROUP_ID = 0
 
-print('Inviter is ' + INVITER_ID)
-print('Invitees are ' + INVITEE_LIST)
-print('Group id is ' + str(GROUP_ID))
-time = datetime.now()
-print('The current time is ' + str(time))
-timestamp = datetime.timestamp(time)
-print('The timestamp is ' + str(timestamp))
-if len(str(timestamp)) != 17:
-    timestamp = str(timestamp) + '0'
-groupkey = get_random_bytes(16)
-print('Generating group key...' + str(groupkey))
-f = open('groupkey.txt', 'wb')
-f.write(groupkey)
-f.close()
+def invite(INVITER_ID, INVITEE_LIST, GROUP_ID):
+    print('Inviter is ' + INVITER_ID)
+    print('Invitees are ' + INVITEE_LIST)
+    print('Group id is ' + str(GROUP_ID))
+    time = datetime.now()
+    print('The current time is ' + str(time))
+    timestamp = datetime.timestamp(time)
+    print('The timestamp is ' + str(timestamp))
+    if len(str(timestamp)) != 17:
+        timestamp = str(timestamp) + '0'
+    groupkey = get_random_bytes(16)
+    print('Generating group key...' + str(groupkey))
+    f = open('groupkey.txt', 'wb')
+    f.write(groupkey)
+    f.close()
 
-# RSA PKCS1 PSS SIGNATURE
-# import the private key of inviter
-sigkfile = open('setup/privatek%s.txt'%INVITER_ID, 'r')
-sigkeystr = sigkfile.read()
-sigkfile.close()
-sigkey = RSA.import_key(sigkeystr)
-signer = PKCS1_PSS.new(sigkey)
+    # RSA PKCS1 PSS SIGNATURE
+    # import the private key of inviter
 
-NET_PATH = './netsim/network/'
-OWN_ADDR = INVITER_ID
-# ISO 11770-3/2
-netif = network_interface(NET_PATH, OWN_ADDR)
-print('Main loop started...')
-for invitee in INVITEE_LIST:
-    
-    print('Encryption started...')
-    
-    # import public key of invitee for RSA
-    pubkeystr = ''
-    with open('setup/table.txt') as f:
-        kfile = f.read()
-    pubkeys = kfile.split("member:")
-    pubkeys.pop(0)
-    for k in pubkeys:
-        if k[0] == invitee:
-            pubkeystr = k.split("key:")[1]
-    if(pubkeystr == ''):
-        print('No public key string read!')
+    sigkfile = open("setup/%s-key.pem"%INVITER_ID,'r')
+    sigkeystr = sigkfile.read()
+    sigkfile.close()
+    password = input("Please enter your password:")
+    sigkey = RSA.import_key(sigkeystr,passphrase = password)
+    signer = PKCS1_PSS.new(sigkey)
 
-    print('(pubkeystr):' + pubkeystr)
+    NET_PATH = './netsim/network/'
+    OWN_ADDR = INVITER_ID
+    # ISO 11770-3/2
+    netif = network_interface(NET_PATH, OWN_ADDR)
+    print('Invite loop started...')
+    for invitee in INVITEE_LIST:
+        
+        print('Encryption started...')
+        
+        # import public key of invitee for RSA
+        pubkeystr = ''
+        with open('setup/table%s.txt'%OWN_ADDR) as f:
+            kfile = f.read()
+        pubkeys = kfile.split("member:")
+        pubkeys.pop(0)
+        for k in pubkeys:
+            if k[0] == invitee:
+                pubkeystr = k.split("key:")[1]
+        if(pubkeystr == ''):
+            print('No public key string read!')
 
-    
-    plaintext = INVITER_ID + str(GROUP_ID) + str(groupkey)
-    # Public key encryption using RSA
-    pubkey = RSA.import_key(pubkeystr)
-    cipher = PKCS1_OAEP.new(pubkey)
-    ciphertext = cipher.encrypt(plaintext.encode('utf-8'))
-    print('Encryption complete.')
-    
-    print('Signing for ' + invitee + '...')
-    msg_to_be_signed = (invitee + str(timestamp)).encode('utf-8') + ciphertext
-    h = SHA256.new()
-    h.update(msg_to_be_signed)
-    signature = signer.sign(h)
-    print('Signature complete.')
-    
-    msg = str(timestamp).encode('utf-8') + ciphertext + signature
-    #print(msg)
+        print('(pubkeystr):' + pubkeystr)
 
-    # Send the encrypted message
-    netif.send_msg('S', msg)
-    print('Invitation to ' + invitee + ' sent.');
+        
+        plaintext = INVITER_ID + str(GROUP_ID) + str(groupkey)
+        # Public key encryption using RSA
+        pubkey = RSA.import_key(pubkeystr)
+        cipher = PKCS1_OAEP.new(pubkey)
+        ciphertext = cipher.encrypt(plaintext.encode('utf-8'))
+        print('Encryption complete.')
+        
+        print('Signing for ' + invitee + '...')
+        msg_to_be_signed = (invitee + str(timestamp)).encode('utf-8') + ciphertext
+        h = SHA256.new()
+        h.update(msg_to_be_signed)
+        signature = signer.sign(h)
+        print('Signature complete.')
+        
+        msg = str(timestamp).encode('utf-8') + ciphertext + signature
+        #print(msg)
+
+        # Send the encrypted message
+        netif.send_msg('S', msg)
+        print('Invitation to ' + invitee + ' sent.');
+    return groupkey

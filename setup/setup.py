@@ -15,6 +15,7 @@ for opt, arg in opts:
         sys.exit()
     elif opt == '-n':
         totalnum = int(arg)
+
 if totalnum == 0:
     print('Error: total number of group members is missing.')
     sys.exit(2)
