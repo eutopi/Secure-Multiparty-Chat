@@ -31,7 +31,7 @@ python server.py
 5. python main.py -s A -i (this is the client for participant A. -i designates A to the group chat inviter)
 ```
 *Note: 
-* Make sure steps (3) and (4) have reached the* ```Main loop started...``` *prompt before you run step (5). This is because B and C need to be waiting for the server in order to receive what is sent by A.
+* Make sure steps (3) and (4) have reached the ```Main loop started...``` prompt before you run step (5). This is because B and C need to be waiting for the server in order to receive what is sent by A.
 * In step (5), the Group id should be a one digit number or a single character. 
 * In step (5), enter invitees without any space (e.g. BC).*
 
