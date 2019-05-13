@@ -30,6 +30,9 @@ python server.py
 4. python main.py -s C (this is the client for participant C)
 5. python main.py -s A -i (this is the client for participant A. -i designates A to the group chat inviter)
 ```
-*Note: make sure steps (3) and (4) have reached the* ```Main loop started...``` *prompt before you run step (5). This is because B and C need to be waiting for the server in order to receive what is sent by A.*
+*Note: 
+* Make sure steps (3) and (4) have reached the* ```Main loop started...``` *prompt before you run step (5). This is because B and C need to be waiting for the server in order to receive what is sent by A.
+* In step (5), the Group id should be a one digit number or a single character. 
+* In step (5), enter invitees without any space (e.g. BC).*
 
 Now, key exchange will occur and send/receive sequence numbers for all the participants be will reset. When you see the prompt ```Begin chatting!```, everything is ready and you can type into the terminal and have a secure conversation!
