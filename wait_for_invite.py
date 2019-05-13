@@ -34,20 +34,7 @@ for opt, arg in opts:
     elif opt == '-s' or opt == '--self':
         OWN_ADDR = arg
 '''
-def receive_invite(netif, OWN_ADDR, INVITER_ID, GROUP_ID, password):
-    # RSA PKCS1 PSS SIGNATURE
-    # import the public key of INVITER_ID
-    pubkeystr = ''
-    with open('setup/table%s.txt'%OWN_ADDR) as f:
-        kfile = f.read()
-    pubkeys = kfile.split("member:")
-    pubkeys.pop(0)
-    for k in pubkeys:
-        if k[0] == INVITER_ID:
-            pubkeystr = k.split("key:")[1]
-    if(pubkeystr == ''):
-        print('No public key string read!')
-        sys.exit(1)
+def receive_invite(netif, OWN_ADDR, GROUP_ID, password):
 
     # import private key of invitee(self) for RSA
     prikfile = open("setup/%s-key.pem"%OWN_ADDR,'r')
@@ -69,28 +56,49 @@ def receive_invite(netif, OWN_ADDR, INVITER_ID, GROUP_ID, password):
         print("Received timestamp: " + timestamp.decode('utf-8'))
         if (current_timestamp - float(timestamp) <= 10): # verify time stamp
             print('Time stamp verified')
-            print('Verifying signature...')
-            msg_to_be_signed = OWN_ADDR.encode('utf-8') + timestamp + ciphertext
-            h = SHA256.new()
-            h.update(msg_to_be_signed)
-            pubkey = RSA.import_key(pubkeystr)
-            verifier = PKCS1_PSS.new(pubkey)
-            if verifier.verify(h, signature):
-                print('Signature verified.')
-                print('Decryption started...')
-                cipher = PKCS1_OAEP.new(prikey)
+            cipher = PKCS1_OAEP.new(prikey)
+            print('Decryption started...')
+            try:
                 plaintext = cipher.decrypt(ciphertext)
-                if (plaintext[0:1]).decode('utf-8') == INVITER_ID and (plaintext[1:2]).decode('utf-8') == GROUP_ID:
-                    print('Decryption success.')
+                print('Decryption success.')
+                if plaintext[1:2].decode('utf-8') == GROUP_ID:
                     print('Group ID is ' + (plaintext[1:2]).decode('utf-8'))
-                    print('Group key is ' + str(plaintext[2:]))
-                    
-                    return(plaintext[2:])
-                    break
                 else:
-                    print('Failed.')
-            else:
-                print('Signature is incorrect! Message was either modified or this is someone else\'s invitation.')
+                    print('Group ID is different!')
+                    return
+                print('Group key is ' + str(plaintext[2:]))
+                print('Verifying signature...')
+                
+                INVITER_ID = plaintext[0:1].decode('utf-8')
+                # RSA PKCS1 PSS SIGNATURE
+                # import the public key of INVITER_ID
+                pubkeystr = ''
+                with open('setup/table%s.txt'%OWN_ADDR) as f:
+                    kfile = f.read()
+                pubkeys = kfile.split("member:")
+                pubkeys.pop(0)
+                for k in pubkeys:
+                    if k[0] == INVITER_ID:
+                        pubkeystr = k.split("key:")[1]
+                if(pubkeystr == ''):
+                    print('No public key string read!')
+                    sys.exit(1)
+                
+                msg_to_be_signed = OWN_ADDR.encode('utf-8') + timestamp + ciphertext
+                h = SHA256.new()
+                h.update(msg_to_be_signed)
+                pubkey = RSA.import_key(pubkeystr)
+                verifier = PKCS1_PSS.new(pubkey)
+                if verifier.verify(h, signature):
+                    print('Signature verified.')
+                    return(plaintext[2:])
+                else:
+                    print('Signature is incorrect!')
+                    return
+            except ValueError:
+                print('Decryption failed. This may be someone else\'s invitation.')
+    
         else:
             print('The timestamp has expired.')
+            return
 
