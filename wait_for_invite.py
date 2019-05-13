@@ -34,7 +34,7 @@ for opt, arg in opts:
     elif opt == '-s' or opt == '--self':
         OWN_ADDR = arg
 '''
-def receive_invite(netif, OWN_ADDR, GROUP_ID, password):
+def receive_invite(netif, OWN_ADDR, password):
 
     # import private key of invitee(self) for RSA
     prikfile = open("setup/%s-key.pem"%OWN_ADDR,'r')
@@ -61,11 +61,7 @@ def receive_invite(netif, OWN_ADDR, GROUP_ID, password):
             try:
                 plaintext = cipher.decrypt(ciphertext)
                 print('Decryption success.')
-                if plaintext[1:2].decode('utf-8') == GROUP_ID:
-                    print('Group ID is ' + (plaintext[1:2]).decode('utf-8'))
-                else:
-                    print('Group ID is different!')
-                    return
+                print('Group ID is ' + (plaintext[1:2]).decode('utf-8'))
                 print('Group key is ' + str(plaintext[2:]))
                 print('Verifying signature...')
                 

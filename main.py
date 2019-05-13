@@ -39,8 +39,7 @@ if invite_flag:
     groupkey = invite(netif, OWN_ADDR, INVITEE_LIST, GROUP_ID, password)
 else:
     password = input("Please enter your password: ")
-    GROUP_ID = input("Please enter group id: ")
-    groupkey = receive_invite(netif, OWN_ADDR, GROUP_ID, password)
+    groupkey = receive_invite(netif, OWN_ADDR, password)
 
 print("Key exchange complete")
 print("")
